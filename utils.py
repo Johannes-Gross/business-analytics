@@ -22,14 +22,21 @@ def preprocessing(df, upsampling_ratio=None, downsampling_ratio=None, test_size=
     #Mark Policy_Sales_Channel and Region_Code as categorical columns such that get_dummies performs 1-hot-encoding on them
     processed['Policy_Sales_Channel'] = processed['Policy_Sales_Channel'].astype('int32').astype('category')
     processed['Region_Code'] = processed['Region_Code'].astype('int32').astype('category')
+
+    #Create new features
     #processed['Premium_Age_Ratio'] = processed['Annual_Premium']/processed['Age']
     #processed['Premium_Vintage_Ratio'] = processed['Annual_Premium']/processed['Vintage']
+    processed['Age_sq'] = processed['Age']*processed['Age']
+    processed['Annual_Premium_sq'] = processed['Annual_Premium']*processed['Annual_Premium']
+    processed['Vintage_sq'] = processed['Vintage']*processed['Vintage']
+
 
     #Reorder columns such that response/label is the last column
     processed = processed[[c for c in processed if c not in ['Response']]+ ['Response']]
 
     #Apply StandardScaler to numerical variables for the neural network downstream
-    processed[['Age','Annual_Premium','Vintage']] = StandardScaler().fit_transform(processed[['Age','Annual_Premium','Vintage']])
+    #processed[['Age','Annual_Premium','Vintage']] = StandardScaler().fit_transform(processed[['Age','Annual_Premium','Vintage']])
+    processed[['Age','Annual_Premium','Vintage','Age_sq','Annual_Premium_sq','Vintage_sq']] = StandardScaler().fit_transform(processed[['Age','Annual_Premium','Vintage','Age_sq','Annual_Premium_sq','Vintage_sq']])
 
     #Train-test-split
     X_train, X_test, y_train, y_test = train_test_split(processed.iloc[:,:-1], processed.iloc[:,-1], test_size=test_size, random_state=42)
@@ -97,8 +104,8 @@ def eval_clf_roc(clf, X_test, y_test, clf_name=''):
 ## Plot histogram of the predicted class probabilites
 def class_probs_hist(clf, X_test, clf_name=''):
     probs = clf.predict_proba(X_test)[:,1]
-    sns.histplot(probs, stat='probability')
-    plt.title(clf_name)
+    ax = sns.histplot(probs, stat='probability')
+    ax.set(xlabel='Probability of class 1', title=clf_name)
     plt.show()
 
 
