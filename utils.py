@@ -88,8 +88,12 @@ def eval_clf_calib(clf, X_test, y_test, clf_name=''):
     probs = clf.predict_proba(X_test)[:,1] #probabilities of class 1
     prob_true, prob_pred = calibration_curve(y_test, probs, n_bins=10, strategy='quantile')
     disp = CalibrationDisplay(prob_true, prob_pred, probs, estimator_name=clf_name)
-    disp.plot()
-    plt.show()
+    #disp.ax_.set_title('Calibration Curve')
+    disp.plot(color='#9659F4')
+    plt.ylabel('Mean empirical probability')
+    plt.savefig('../CalibrationCurve2', dpi=500)
+    #plt.title('Calibration Curve')
+    #plt.show()
 
 
 ## Calculates the ROC curve and AUC score
@@ -104,8 +108,11 @@ def eval_clf_roc(clf, X_test, y_test, clf_name=''):
 ## Plot histogram of the predicted class probabilites
 def class_probs_hist(clf, X_test, clf_name=''):
     probs = clf.predict_proba(X_test)[:,1]
-    ax = sns.histplot(probs, stat='probability')
-    ax.set(xlabel='Probability of class 1', title=clf_name)
+    ax = sns.histplot(100*probs, stat='percent', color='#9659F4', bins=15)
+    ax.set(xlabel='Purchase Propensity [%]', title=clf_name, ylabel='Percentage of Occurance [%]')
+    ax.set_yticks(list(range(0,51,5)))
+    ax.set_xticks(list(range(0,61,10)))
+    plt.savefig('../PurchaseProbs15.png', dpi=500)
     plt.show()
 
 
